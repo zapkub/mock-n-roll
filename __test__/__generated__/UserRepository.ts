@@ -40,7 +40,7 @@ export class UserRepository {
             return isEqual(c[0], calls)
         })
         if (!result) {
-            throw new Error(`call ${name} with ${JSON.stringify(args)} is not exists`)
+            throw new Error(`call ${name} with ${JSON.stringify(args)} does not exists`)
         }
         return result[1]
     }

@@ -76,7 +76,7 @@ export function generateMockClass(
             w.writeLine('})')
             w.writeLine('if (!result) {')
             w.writeLine(
-              ' throw new Error(`call ${name} with ${JSON.stringify(args)} is not exists`)'
+              ' throw new Error(`call ${name} with ${JSON.stringify(args)} does not exists`)'
             )
             w.writeLine('}')
             w.writeLine('return result[1]')

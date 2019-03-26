@@ -3,10 +3,17 @@ import * as path from 'path'
 
 var argv = require('minimist')(process.argv.slice(2))
 const reg = new RegExp(argv._.join('|'))
-const targetFolder = path.join(__dirname, './__test__')
+
+if (!argv.dir) {
+  throw new Error("Please provide --dir")
+}
+
+if (!argv.out) {
+  argv.out = path.join(argv.dir, "__generated__")
+}
 
 generateMockClass(
-  path.join(__dirname, './__test__'),
-  path.join(targetFolder, './__generated__'),
+  path.join(argv.dir),
+  path.join(argv.out),
   reg,
 )

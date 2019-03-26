@@ -1,13 +1,14 @@
 {
-  "name": "typescream",
+  "name": "mock-n-roll",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "ts-node index.ts && jest --config jest.unit.json"
+    "start": "ts-node bin.ts --dir ./__test__ --out ./__generated",
+    "test": "ts-node __test__/gen.ts && jest --config jest.unit.json"
   },
   "bin": {
-    "tscream": "dist/bin.js"
+    "mnroll": "dist/bin.js"
   },
   "author": "",
   "license": "ISC",
