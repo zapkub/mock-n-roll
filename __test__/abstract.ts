@@ -15,4 +15,6 @@ export interface UserRepository {
   createUser(input: CreateInput): Promise<User>
   createManyUser(...inputs: CreateManyInput[]): Promise<User[]>
   createManyAdmin(...inputs: CreateAdminInput[]): Promise<Admin[]>
+
+  gen: (input: string) => User
 }

@@ -5,32 +5,24 @@ export class UserRepository {
     mocks = {
         randomUser: () => {
             return {
-                toReturn: (returnArg: User) => {
-                    this.called.push([["randomUser",], returnArg])
-                }
-            }        
-},
+                toReturn: (returnArg: User) => { this.called.push([["randomUser",], returnArg]) }
+            }
+        },
         createUser: (input: CreateInput) => {
             return {
-                toReturn: (returnArg: Promise<User>) => {
-                    this.called.push([["createUser", input], returnArg])
-                }
-            }        
-},
+                toReturn: (returnArg: Promise<User>) => { this.called.push([["createUser", input], returnArg]) }
+            }
+        },
         createManyUser: (...inputs: CreateManyInput[]) => {
             return {
-                toReturn: (returnArg: Promise<User[]>) => {
-                    this.called.push([["createManyUser", ...inputs], returnArg])
-                }
-            }        
-},
+                toReturn: (returnArg: Promise<User[]>) => { this.called.push([["createManyUser", ...inputs], returnArg]) }
+            }
+        },
         createManyAdmin: (...inputs: CreateAdminInput[]) => {
             return {
-                toReturn: (returnArg: Promise<Admin[]>) => {
-                    this.called.push([["createManyAdmin", ...inputs], returnArg])
-                }
-            }        
-}
+                toReturn: (returnArg: Promise<Admin[]>) => { this.called.push([["createManyAdmin", ...inputs], returnArg]) }
+            }
+        }
     };
     called: any[] = [];
 
