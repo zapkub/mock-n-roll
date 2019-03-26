@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "ts-node index.ts"
+    "test": "ts-node index.ts && jest --config jest.unit.json"
   },
   "bin": {
     "tscream": "dist/bin.js"
@@ -13,6 +13,9 @@
   "license": "ISC",
   "devDependencies": {
     "ts-node": "^8.0.2",
+    "@types/jest": "^24.0.11",
+    "jest": "^24.5.0",
+    "ts-jest": "^24.0.0",
     "@types/node": "^11.11.7"
   },
   "dependencies": {

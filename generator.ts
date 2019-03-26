@@ -25,13 +25,12 @@ export function generateMockClass(
         return i.getName().match(reg)
       })
       .filter(i => {
-        return i.getMethods()
+        return i.getMethods().length > 0
       })
       .forEach(i => {
         const filePath = path.join(mockFolder, `${i.getName()}.ts`)
         rimraf.sync(filePath)
         const mockFile = project.createSourceFile(filePath)
-
         mockFile.addImportDeclaration({
           namedImports: ['isEqual'],
           moduleSpecifier: 'lodash'

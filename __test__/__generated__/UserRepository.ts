@@ -1,8 +1,15 @@
 import { isEqual } from "lodash";
-import { CreateInput, User, CreateManyInput, CreateAdminInput, Admin } from "../abstract";
+import { User, CreateInput, CreateManyInput, CreateAdminInput, Admin } from "../abstract";
 
 export class UserRepository {
     mocks = {
+        randomUser: () => {
+            return {
+                toReturn: (returnArg: User) => {
+                    this.called.push([["randomUser",], returnArg])
+                }
+            }        
+},
         createUser: (input: CreateInput) => {
             return {
                 toReturn: (returnArg: Promise<User>) => {
@@ -36,6 +43,10 @@ export class UserRepository {
             throw new Error(`call ${name} with ${JSON.stringify(args)} is not exists`)
         }
         return result[1]
+    }
+
+    randomUser(): User {
+        return this.on("randomUser")
     }
 
     createUser(input: CreateInput): Promise<User> {
