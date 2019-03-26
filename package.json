@@ -1,0 +1,24 @@
+{
+  "name": "typescream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "ts-node index.ts"
+  },
+  "bin": {
+    "tscream": "dist/bin.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^8.0.2",
+    "@types/node": "^11.11.7"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3",
+    "ts-morph": "^1.3.1"
+  }
+}
