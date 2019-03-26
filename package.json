@@ -1,10 +1,14 @@
 {
-  "name": "mock-n-roll",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@rungsikorn/mock-n-roll",
+  "version": "1.0.1",
+  "description": "A Typescript mock file generator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zapkub/mock-n-roll"
+  },
+  "main": "dist/index.js",
   "scripts": {
-    "start": "ts-node bin.ts --dir ./__test__ --out ./__generated",
+    "start": "node dist/bin.js --dir ./__test__ --out ./__generated__",
     "test": "ts-node __test__/gen.ts && jest --config jest.unit.json"
   },
   "bin": {

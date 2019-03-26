@@ -3,7 +3,7 @@
     "types": ["jest", "node"],
     "experimentalDecorators": true,
     "noUnusedLocals": false,
-    "allowJs": true,
+    "allowJs": false,
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": false,

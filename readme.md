@@ -1,4 +1,4 @@
-# Mock'N' Roll 🤘🏼
+# Mock 'N' Roll 🤘🏼
 The Typescript interface mock generator. It will useful for Dependency Injection, Inversion and also Clean architecture onion layer testing and more !
 
 # Usage
