@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { generateMockClass } from './generator'
 import * as path from 'path'
 
