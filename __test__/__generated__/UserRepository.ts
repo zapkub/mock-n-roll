@@ -1,7 +1,7 @@
 import { isEqual } from "lodash";
 import { User, CreateInput, CreateManyInput, CreateAdminInput, Admin } from "../abstract";
 
-export class UserRepository {
+export class __mock__UserRepository {
     called: any[] = [];
 
     on(name: string, ...args) {

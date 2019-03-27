@@ -1,6 +1,6 @@
 import { isEqual } from "lodash";
 
-export class Admin {
+export class __mock__Admin {
     called: any[] = [];
 
     on(name: string, ...args) {

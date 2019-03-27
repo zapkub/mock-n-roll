@@ -190,7 +190,7 @@ export function generateMockClass(
         const mockFile = project.createSourceFile(filePath)
 
         const mockClass = mockFile.addClass({
-          name: i.getName(),
+          name: "__mock__" + i.getName(),
           isExported: true
         })
         addMocks(mockClass)

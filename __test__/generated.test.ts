@@ -1,7 +1,17 @@
-import { UserRepository } from './__generated__/UserRepository'
+import { __mock__UserRepository } from './__generated__/UserRepository'
+import { UserRepository } from './abstract';
 
 describe('Generated result testing', () => {
-  const u = new UserRepository()
+  const u = new __mock__UserRepository()
+
+  it('Should inheritance of source interface', async () => {
+    u.defaultRole = "user"
+    function x(userRepository: UserRepository) {
+      expect(userRepository.defaultRole).toEqual("user") 
+    }
+    x(u)
+  })
+
   it('Should return promise of array type correctly', async () => {
     u.mocks
       .createManyAdmin({ name: 'TEST', role: 'role' })
