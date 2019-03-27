@@ -9,6 +9,11 @@ describe('Generated result testing', () => {
     const result = await u.createManyAdmin({ name: 'TEST', role: 'role' })
     expect(result).toEqual([])
   })
+  it('should able to mock FunctionType property', async () => {
+    u.mocks.gen('Test').toReturn({ name: 'ba', id: 'foo' })
+    const result = u.gen('Test')
+    expect(result).toEqual({ name: 'ba', id: 'foo' })
+  })
   it('Should return promise of object type correctly', async () => {
     u.mocks.randomUser().toReturn({ id: 'TEST', name: 'TEST' })
     const result = u.randomUser()

@@ -1,4 +1,16 @@
-import { SourceFile, TypeNode, SyntaxKind } from "ts-morph";
+import { SourceFile, TypeNode, SyntaxKind, MethodSignature, FunctionTypeNode } from 'ts-morph'
+
+export function getIdentifierListOfMethodArgs(method: MethodSignature | FunctionTypeNode) {
+  return method
+    .getParameters()
+    .map(p => {
+      if (p.getDotDotDotToken()) {
+        return `...${p.getName()}`
+      }
+      return p.getName()
+    })
+    .join(',')
+}
 
 export function ImportTypeIfNeeded(
   src: SourceFile,

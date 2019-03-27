@@ -4,6 +4,8 @@ export interface User {
 }
 export interface Admin extends User {
   role: string
+  
+  setRole(): string
 }
 
 export type CreateInput = Pick<User, 'name'>
@@ -17,4 +19,6 @@ export interface UserRepository {
   createManyAdmin(...inputs: CreateAdminInput[]): Promise<Admin[]>
 
   gen: (input: string) => User
+
+  defaultRole: string
 }

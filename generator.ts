@@ -8,11 +8,17 @@ import {
   FunctionTypeNode
 } from 'ts-morph'
 import * as path from 'path'
-import { ImportTypeIfNeeded } from './helpers'
+import { ImportTypeIfNeeded, getIdentifierListOfMethodArgs } from './helpers'
+import { isMethodSignature, isFunctionTypeNode } from 'typescript'
 const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
 
 export function addMocks(mockClass: ClassDeclaration) {
+  const mockFile = mockClass.getParentIfKindOrThrow(SyntaxKind.SourceFile)
+  mockFile.addImportDeclaration({
+    namedImports: ['isEqual'],
+    moduleSpecifier: 'lodash'
+  })
   mockClass.addProperty({
     name: 'called',
     type: 'any[]',
@@ -102,13 +108,60 @@ export function addMocksMethod(
   })
 }
 
+export function addMethodsToMockClass(
+  file: SourceFile,
+  mockFile: SourceFile,
+  mockClass: ClassDeclaration,
+  m: MethodSignature | FunctionTypeNode
+) {
+  // Import every type of parameters if needed
+  m.getParameters().forEach(param => {
+    const f9 = param.getTypeNodeOrThrow().compilerNode
+    if (f9.kind === SyntaxKind.TypeReference) {
+      f9.getChildren().forEach(c => {
+        if (c.kind === SyntaxKind.Identifier) {
+        }
+      })
+    }
+    ImportTypeIfNeeded(file, mockFile, param.getTypeNodeOrThrow())
+  })
+
+  // Also import return type if needed
+  ImportTypeIfNeeded(file, mockFile, m.getReturnTypeNodeOrThrow())
+  const methodArgs = getIdentifierListOfMethodArgs(m)
+  const methodReturnType = m.getReturnTypeNodeOrThrow().getFullText()
+  let name: string
+
+  if (isMethodSignature(m.compilerNode)) {
+    name = (<MethodSignature>m).getName()
+  } else if (isFunctionTypeNode(m.compilerNode)) {
+    name = (<FunctionTypeNode>m)
+      .getParentIfKindOrThrow(SyntaxKind.PropertySignature)
+      .getFirstChildByKindOrThrow(SyntaxKind.Identifier)
+      .getText()
+  } else {
+    throw new Error('Node does not support')
+  }
+
+  mockClass.addMethod({
+    name: name,
+    parameters: m.getParameters().map(p => p.getStructure()),
+    returnType: w => {
+      w.write(methodReturnType)
+    },
+    bodyText: w => {
+      w.writeLine(`return this.on("${name}", ${methodArgs})`)
+    }
+  })
+  addMocksMethod(mockClass, name, m)
+}
+
 export function generateMockClass(
   srcFolder: string,
   mockFolder: string,
   reg: RegExp
 ) {
   const project = new Project({})
-
   mkdirp.sync(srcFolder)
 
   // add source files
@@ -123,16 +176,18 @@ export function generateMockClass(
         return i.getName().match(reg)
       })
       .filter(i => {
-        return i.getMethods().length > 0
+        return (
+          i.getMethods().length > 0 ||
+          i
+            .getProperties()
+            .filter(p => p.getLastChildByKind(SyntaxKind.FunctionType)).length >
+            0
+        )
       })
       .forEach(i => {
         const filePath = path.join(mockFolder, `${i.getName()}.ts`)
         rimraf.sync(filePath)
         const mockFile = project.createSourceFile(filePath)
-        mockFile.addImportDeclaration({
-          namedImports: ['isEqual'],
-          moduleSpecifier: 'lodash'
-        })
 
         const mockClass = mockFile.addClass({
           name: i.getName(),
@@ -141,50 +196,19 @@ export function generateMockClass(
         addMocks(mockClass)
 
         i.getMethods().forEach(m => {
-          const name = m.getName()
-
-          // Import every type of parameters if needed
-          m.getParameters().forEach(param => {
-            const f9 = param.getTypeNodeOrThrow().compilerNode
-            if (f9.kind === SyntaxKind.TypeReference) {
-              f9.getChildren().forEach(c => {
-                if (c.kind === SyntaxKind.Identifier) {
-                }
-              })
-            }
-            ImportTypeIfNeeded(file, mockFile, param.getTypeNodeOrThrow())
-          })
-
-          // Also import return type if needed
-          ImportTypeIfNeeded(file, mockFile, m.getReturnTypeNodeOrThrow())
-
-          const targetMethod = {
-            name: name,
-            parameters: m.getParameters().map(p => p.getStructure())
+          addMethodsToMockClass(file, mockFile, mockClass, m)
+        })
+        i.getProperties().forEach(p => {
+          if (p.getFirstChildByKind(SyntaxKind.FunctionType)) {
+            addMethodsToMockClass(
+              file,
+              mockFile,
+              mockClass,
+              p.getFirstChildByKindOrThrow(SyntaxKind.FunctionType)
+            )
+          } else {
+            mockClass.addProperty(p.getStructure())
           }
-
-          const methodArgs = m
-            .getParameters()
-            .map(p => {
-              if (p.getDotDotDotToken()) {
-                return `...${p.getName()}`
-              }
-              return p.getName()
-            })
-            .join(',')
-          const methodReturnType = m.getReturnTypeNodeOrThrow().getFullText()
-          mockClass.addMethod({
-            ...targetMethod,
-            returnType: w => {
-              w.write(methodReturnType)
-            },
-            bodyText: w => {
-              w.writeLine(
-                `return this.on("${targetMethod.name}", ${methodArgs})`
-              )
-            }
-          })
-          addMocksMethod(mockClass, name, m)
         })
         mockFile.formatText()
       })
