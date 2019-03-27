@@ -1,9 +1,10 @@
 import { isEqual } from "lodash";
+import { User } from "../abstract";
 
-export class __mock__Admin {
+export class __mock__Elastic {
     called: any[] = [];
 
-    on(name: string, ...args) {
+    on(name: string, ...args: any) {
         const result = this.called.find(c => {
             const calls = [name, ...args]
             return isEqual(c[0], calls)
@@ -15,16 +16,14 @@ export class __mock__Admin {
     }
 
     mocks = {
-        setRole: () => {
+        searchUser: () => {
             return {
-                toReturn: (returnArg: string) => { this.called.push([["setRole",], returnArg]) }
+                toReturn: (returnArg: User) => { this.called.push([["searchUser",], returnArg]) }
             }
         }
     };
 
-    setRole(): string {
-        return this.on("setRole")
+    searchUser(): User {
+        return this.on("searchUser")
     }
-
-    role: string;
 }

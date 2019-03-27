@@ -1,33 +1,13 @@
-import { __mock__UserRepository } from './__generated__/UserRepository'
-import { UserRepository, Elastic } from './abstract'
-import { __mock__Elastic } from './__generated__/Elastic'
-
-describe('Generated mock from class should work', () => {
-  it('Should work', () => {
-    function x(e: Elastic) {
-      expect(e.searchUser()).toBeDefined()
-    }
-
-    const defaultElasic = new Elastic()
-    const mockElastic = new __mock__Elastic()
-    mockElastic.mocks.searchUser().toReturn({
-      id: 'unit',
-      name: 'unit'
-    })
-
-    x(defaultElasic)
-    x(mockElastic)
-
-  })
-})
+import { __mock__UserRepository } from '../__generated__/UserRepository'
+import { UserRepository } from '../abstract';
 
 describe('Generated result testing', () => {
   const u = new __mock__UserRepository()
 
   it('Should inheritance of source interface', async () => {
-    u.defaultRole = 'user'
+    u.defaultRole = "user"
     function x(userRepository: UserRepository) {
-      expect(userRepository.defaultRole).toEqual('user')
+      expect(userRepository.defaultRole).toEqual("user") 
     }
     x(u)
   })

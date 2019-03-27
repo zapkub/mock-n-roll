@@ -3,7 +3,7 @@ import { generateMockClass } from './generator'
 export type mocknrollOptions = {
   dir: string
   out?: string
-  interfaceMatcher: RegExp
+  targetName: string
 }
 export default function(options: mocknrollOptions) {
   if (!options.dir) {
@@ -13,5 +13,5 @@ export default function(options: mocknrollOptions) {
   if (!options.out) {
     options.out = '__generated__'
   }
-  generateMockClass(options.dir, options.out, options.interfaceMatcher)
+  generateMockClass(options.dir, options.out, options.targetName)
 }

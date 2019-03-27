@@ -5,11 +5,14 @@ import {
   ClassDeclarationStructure,
   ClassDeclaration,
   MethodSignature,
-  FunctionTypeNode
+  FunctionTypeNode,
+  MethodDeclaration,
+  InterfaceDeclaration
 } from 'ts-morph'
 import * as path from 'path'
 import { ImportTypeIfNeeded, getIdentifierListOfMethodArgs } from './helpers'
-import { isMethodSignature, isFunctionTypeNode } from 'typescript'
+import { isMethodSignature, isFunctionTypeNode, isMethodDeclaration } from 'typescript'
+import { Interface } from 'readline'
 const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
 
@@ -35,7 +38,8 @@ export function addMocks(mockClass: ClassDeclaration) {
       },
       {
         name: 'args',
-        isRestParameter: true
+        isRestParameter: true,
+        type: 'any'
       }
     ],
     bodyText: w => {
@@ -63,16 +67,24 @@ export function addMocks(mockClass: ClassDeclaration) {
 export function addMocksMethod(
   mockClass: ClassDeclaration,
   methodName: string,
-  signature: MethodSignature | FunctionTypeNode
+  signature: MethodSignature | FunctionTypeNode | MethodDeclaration
 ) {
   const mocks = mockClass
     .getPropertyOrThrow('mocks')
     .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
 
+  let typeParam = ''
+  if (signature.getTypeParameters().length > 0) {
+    typeParam = `<${signature
+      .getTypeParameters()
+      .map(p => p.getName())
+      .join(',')}>`
+  }
+
   const mockFunc = mocks.addPropertyAssignment({
     name: methodName,
     initializer: w => {
-      w.write('() => { return { } }')
+      w.write(`${typeParam}() => { return { } }`)
     }
   })
   const func = mockFunc.getFirstChildByKindOrThrow(SyntaxKind.ArrowFunction)
@@ -92,12 +104,13 @@ export function addMocksMethod(
     .getFirstChildByKindOrThrow(SyntaxKind.SyntaxList)
     .getFirstChildByKindOrThrow(SyntaxKind.ReturnStatement)
     .getFirstChildByKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+
   const toReturnFunc = returnObject
     .addPropertyAssignment({
       name: 'toReturn',
       initializer: w => {
         w.write(
-          ` () => { this.called.push([["${methodName}", ${paramIdentifiers}], returnArg]) }`
+          `${typeParam}() => { this.called.push([["${methodName}", ${paramIdentifiers}], returnArg]) }`
         )
       }
     })
@@ -112,7 +125,7 @@ export function addMethodsToMockClass(
   file: SourceFile,
   mockFile: SourceFile,
   mockClass: ClassDeclaration,
-  m: MethodSignature | FunctionTypeNode
+  m: MethodSignature | FunctionTypeNode | MethodDeclaration
 ) {
   // Import every type of parameters if needed
   m.getParameters().forEach(param => {
@@ -132,87 +145,113 @@ export function addMethodsToMockClass(
   const methodReturnType = m.getReturnTypeNodeOrThrow().getFullText()
   let name: string
 
-  if (isMethodSignature(m.compilerNode)) {
+  if (isMethodSignature(m.compilerNode) || isMethodDeclaration(m.compilerNode)) {
     name = (<MethodSignature>m).getName()
+    mockClass.addMethod({
+      name: name,
+      parameters: m.getParameters().map(p => p.getStructure()),
+      returnType: w => {
+        w.write(methodReturnType)
+      },
+      bodyText: w => {
+        w.writeLine(`return this.on("${name}", ${methodArgs})`)
+      }
+    })
   } else if (isFunctionTypeNode(m.compilerNode)) {
     name = (<FunctionTypeNode>m)
       .getParentIfKindOrThrow(SyntaxKind.PropertySignature)
       .getFirstChildByKindOrThrow(SyntaxKind.Identifier)
       .getText()
+
+    let typeParam = ''
+    if (m.getTypeParameters().length > 0) {
+      typeParam = `<${m
+        .getTypeParameters()
+        .map(p => p.getName())
+        .join(',')}>`
+    }
+    const funcProp = mockClass.addProperty({
+      name,
+      initializer: w => {
+        w.write(`${typeParam}() =>`)
+        w.block(() => {
+          w.writeLine(`return this.on("${name}", ${methodArgs})`)
+        })
+      }
+    })
+    const func = funcProp.getFirstChildByKindOrThrow(SyntaxKind.ArrowFunction)
+    func.addParameters(m.getParameters().map(p => p.getStructure()))
   } else {
     throw new Error('Node does not support')
   }
 
-  mockClass.addMethod({
-    name: name,
-    parameters: m.getParameters().map(p => p.getStructure()),
-    returnType: w => {
-      w.write(methodReturnType)
-    },
-    bodyText: w => {
-      w.writeLine(`return this.on("${name}", ${methodArgs})`)
+  console.log(`Mock ${name}`)
+  addMocksMethod(mockClass, name, m)
+}
+
+function generateMock(
+  file: SourceFile,
+  mockFolder: string,
+  project: Project,
+  i: InterfaceDeclaration | ClassDeclaration
+) {
+  const filePath = path.join(mockFolder, `${i.getName()}.ts`)
+  rimraf.sync(filePath)
+  const mockFile = project.createSourceFile(filePath)
+
+  const mockClass = mockFile.addClass({
+    name: '__mock__' + i.getName(),
+    isExported: true
+  })
+  addMocks(mockClass)
+
+  i.getMethods().forEach(m => {
+    addMethodsToMockClass(file, mockFile, mockClass, m)
+  })
+  i.getProperties().forEach(p => {
+    if (p.getFirstChildByKind(SyntaxKind.FunctionType)) {
+      addMethodsToMockClass(
+        file,
+        mockFile,
+        mockClass,
+        p.getFirstChildByKindOrThrow(SyntaxKind.FunctionType)
+      )
+    } else {
+      mockClass.addProperty(p.getStructure())
+      if (p.getTypeNode()) {
+        ImportTypeIfNeeded(file, mockFile, p.getTypeNodeOrThrow())
+      }
     }
   })
-  addMocksMethod(mockClass, name, m)
+  mockFile.formatText()
 }
 
 export function generateMockClass(
   srcFolder: string,
   mockFolder: string,
-  reg: RegExp
+  targetName: string
 ) {
   const project = new Project({})
-  mkdirp.sync(srcFolder)
+  mkdirp.sync(mockFolder)
 
   // add source files
-  project.addExistingSourceFiles(path.join(srcFolder, '*.ts'))
+  project.addExistingSourceFiles(path.join(srcFolder))
   project.getSourceFiles().forEach(file => {
     // filter out interface
     // that does not have any method
     // and not a target
+    function matchName(i: InterfaceDeclaration | ClassDeclaration) {
+      return i.getName() === targetName && i.getMethods().length > 0
+    }
+
+    file
+      .getClasses()
+      .filter(matchName)
+      .forEach(i => generateMock(file, mockFolder, project, i))
     file
       .getInterfaces()
-      .filter(i => {
-        return i.getName().match(reg)
-      })
-      .filter(i => {
-        return (
-          i.getMethods().length > 0 ||
-          i
-            .getProperties()
-            .filter(p => p.getLastChildByKind(SyntaxKind.FunctionType)).length >
-            0
-        )
-      })
-      .forEach(i => {
-        const filePath = path.join(mockFolder, `${i.getName()}.ts`)
-        rimraf.sync(filePath)
-        const mockFile = project.createSourceFile(filePath)
-
-        const mockClass = mockFile.addClass({
-          name: "__mock__" + i.getName(),
-          isExported: true
-        })
-        addMocks(mockClass)
-
-        i.getMethods().forEach(m => {
-          addMethodsToMockClass(file, mockFile, mockClass, m)
-        })
-        i.getProperties().forEach(p => {
-          if (p.getFirstChildByKind(SyntaxKind.FunctionType)) {
-            addMethodsToMockClass(
-              file,
-              mockFile,
-              mockClass,
-              p.getFirstChildByKindOrThrow(SyntaxKind.FunctionType)
-            )
-          } else {
-            mockClass.addProperty(p.getStructure())
-          }
-        })
-        mockFile.formatText()
-      })
+      .filter(matchName)
+      .forEach(i => generateMock(file, mockFolder, project, i))
   })
-  project.getPreEmitDiagnostics()
   project.save()
 }

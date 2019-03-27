@@ -1,10 +1,11 @@
 import { isEqual } from "lodash";
-import { User, CreateInput, CreateManyInput, CreateAdminInput, Admin } from "../abstract";
+import { User, CreateInput, CreateManyInput, CreateAdminInput, Admin, RoleInfo } from "../abstract";
+import { AccessorDeclaration } from "../../node_modules/ts-morph/dist-declarations/ts-morph";
 
 export class __mock__UserRepository {
     called: any[] = [];
 
-    on(name: string, ...args) {
+    on(name: string, ...args: any) {
         const result = this.called.find(c => {
             const calls = [name, ...args]
             return isEqual(c[0], calls)
@@ -36,9 +37,26 @@ export class __mock__UserRepository {
                 toReturn: (returnArg: Promise<Admin[]>) => { this.called.push([["createManyAdmin", ...inputs], returnArg]) }
             }
         },
+        delimiter: (d: AccessorDeclaration) => {
+            return {
+                toReturn: (returnArg: AccessorDeclaration) => { this.called.push([["delimiter", d], returnArg]) }
+            }
+        },
         gen: (input: string) => {
             return {
                 toReturn: (returnArg: User) => { this.called.push([["gen", input], returnArg]) }
+            }
+        },
+        generic: <T>(input: T) => {
+            return {
+                toReturn: <T>(returnArg: T) => { this.called.push([["generic", input], returnArg]) }
+            }
+        },
+        delime: (d: {
+            role: RoleInfo
+        }) => {
+            return {
+                toReturn: (returnArg: AccessorDeclaration) => { this.called.push([["delime", d], returnArg]) }
             }
         }
     };
@@ -59,9 +77,20 @@ export class __mock__UserRepository {
         return this.on("createManyAdmin", ...inputs)
     }
 
-    gen(input: string): User {
-        return this.on("gen", input)
+    delimiter(d: AccessorDeclaration): AccessorDeclaration {
+        return this.on("delimiter", d)
     }
 
+    gen = (input: string) => {
+        return this.on("gen", input)
+    };
     defaultRole: string;
+    generic = <T>(input: T) => {
+        return this.on("generic", input)
+    };
+    delime = (d: {
+        role: RoleInfo
+    }) => {
+        return this.on("delime", d)
+    };
 }

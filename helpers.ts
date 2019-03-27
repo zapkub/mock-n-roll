@@ -1,6 +1,15 @@
-import { SourceFile, TypeNode, SyntaxKind, MethodSignature, FunctionTypeNode } from 'ts-morph'
+import {
+  SourceFile,
+  TypeNode,
+  SyntaxKind,
+  MethodSignature,
+  FunctionTypeNode,
+  MethodDeclaration
+} from 'ts-morph'
 
-export function getIdentifierListOfMethodArgs(method: MethodSignature | FunctionTypeNode) {
+export function getIdentifierListOfMethodArgs(
+  method: MethodSignature | FunctionTypeNode | MethodDeclaration
+) {
   return method
     .getParameters()
     .map(p => {
@@ -29,6 +38,14 @@ export function ImportTypeIfNeeded(
   typeNode.getChildrenOfKind(SyntaxKind.TypeReference).forEach(t => {
     ImportTypeIfNeeded(src, mock, t)
   })
+  typeNode.getChildrenOfKind(SyntaxKind.SyntaxList).forEach(s => {
+    s.getChildrenOfKind(SyntaxKind.PropertySignature).forEach(sig => {
+      const ref = sig.getFirstChildByKind(SyntaxKind.TypeReference)
+      if (ref) {
+        ImportByName(src, mock, ref.getTypeName().getText())
+      }
+    })
+  })
 }
 
 export function ImportByName(
@@ -36,7 +53,7 @@ export function ImportByName(
   mock: SourceFile,
   name: string
 ): boolean {
-  if (name.match(/Pick|Promise/)) {
+  if (name.match(/^Pick$|^Promise$/)) {
     console.log(`skip to import ${name}`)
     return false
   }
@@ -47,9 +64,13 @@ export function ImportByName(
   })
   let moduleSpecifier: string | undefined
   if (srcImportLine) {
-    moduleSpecifier = mock.getRelativePathAsModuleSpecifierTo(
-      srcImportLine.getModuleSpecifierSourceFileOrThrow()
-    )
+    if (srcImportLine.getModuleSpecifierSourceFile()) {
+      moduleSpecifier = mock.getRelativePathAsModuleSpecifierTo(
+        srcImportLine.getModuleSpecifierSourceFileOrThrow()
+      )
+    } else {
+      moduleSpecifier = srcImportLine.getModuleSpecifierValue()
+    }
   } else {
     const exp = src.getExportSymbols().find(ex => {
       return ex.getName() === name
@@ -75,7 +96,7 @@ export function ImportByName(
         .find(named => named.getSymbolOrThrow().getName() === name)
     ) {
       importStatement.addNamedImport(name)
-    }
+    } 
     return true
   } else {
     mock.addImportDeclaration({
