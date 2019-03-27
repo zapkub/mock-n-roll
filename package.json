@@ -1,6 +1,6 @@
 {
   "name": "@rungsikorn/mock-n-roll",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A Typescript mock file generator",
   "repository": {
     "type": "git",
