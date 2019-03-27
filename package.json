@@ -1,6 +1,6 @@
 {
   "name": "@rungsikorn/mock-n-roll",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "A Typescript mock file generator",
   "repository": {
     "type": "git",
@@ -16,6 +16,9 @@
   },
   "author": "",
   "license": "ISC",
+  "peerDependencies": {
+    "typescript": "^3.3.4000"
+  },
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/lodash": "^4.14.123",

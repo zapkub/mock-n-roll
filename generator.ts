@@ -11,7 +11,11 @@ import {
 } from 'ts-morph'
 import * as path from 'path'
 import { ImportTypeIfNeeded, getIdentifierListOfMethodArgs } from './helpers'
-import { isMethodSignature, isFunctionTypeNode, isMethodDeclaration } from 'typescript'
+import {
+  isMethodSignature,
+  isFunctionTypeNode,
+  isMethodDeclaration
+} from 'typescript'
 import { Interface } from 'readline'
 const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
@@ -109,16 +113,25 @@ export function addMocksMethod(
     .addPropertyAssignment({
       name: 'toReturn',
       initializer: w => {
-        w.write(
-          `${typeParam}() => { this.called.push([["${methodName}", ${paramIdentifiers}], returnArg]) }`
-        )
+        if (signature.getReturnTypeNode()) {
+          w.write(
+            `${typeParam}() => { this.called.push([["${methodName}", ${paramIdentifiers}], returnArg]) }`
+          )
+        } else {
+          w.write(
+            `${typeParam}() => { this.called.push([["${methodName}", ${paramIdentifiers}]]) }`
+          )
+        }
       }
     })
     .getFirstChildByKindOrThrow(SyntaxKind.ArrowFunction)
-  toReturnFunc.addParameter({
-    name: 'returnArg',
-    type: signature.getReturnTypeNodeOrThrow().getFullText()
-  })
+
+  if (signature.getReturnTypeNode()) {
+    toReturnFunc.addParameter({
+      name: 'returnArg',
+      type: signature.getReturnTypeNodeOrThrow().getFullText()
+    })
+  }
 }
 
 export function addMethodsToMockClass(
@@ -139,13 +152,19 @@ export function addMethodsToMockClass(
     ImportTypeIfNeeded(file, mockFile, param.getTypeNodeOrThrow())
   })
 
-  // Also import return type if needed
-  ImportTypeIfNeeded(file, mockFile, m.getReturnTypeNodeOrThrow())
   const methodArgs = getIdentifierListOfMethodArgs(m)
-  const methodReturnType = m.getReturnTypeNodeOrThrow().getFullText()
+  let methodReturnType = ''
+  // Also import return type if needed
+  if (m.getReturnTypeNode()) {
+    ImportTypeIfNeeded(file, mockFile, m.getReturnTypeNodeOrThrow())
+    methodReturnType = m.getReturnTypeNodeOrThrow().getFullText()
+  }
   let name: string
 
-  if (isMethodSignature(m.compilerNode) || isMethodDeclaration(m.compilerNode)) {
+  if (
+    isMethodSignature(m.compilerNode) ||
+    isMethodDeclaration(m.compilerNode)
+  ) {
     name = (<MethodSignature>m).getName()
     mockClass.addMethod({
       name: name,
@@ -241,7 +260,7 @@ export function generateMockClass(
     // that does not have any method
     // and not a target
     function matchName(i: InterfaceDeclaration | ClassDeclaration) {
-      return i.getName() === targetName && i.getMethods().length > 0
+      return i.getName() === targetName
     }
 
     file

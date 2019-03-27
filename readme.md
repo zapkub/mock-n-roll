@@ -6,6 +6,7 @@ The Typescript interface mock generator. It will useful for Dependency Injection
 mnroll --path <path_to_ts_file> --out <result_folder:./__generated__> --name <name_of_class_or_interface>
 ```
 
+
 # Basic test
 ```typescript
 // Source interface

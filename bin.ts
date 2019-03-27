@@ -16,7 +16,8 @@ if (!argv.name) {
 }
 
 if (!argv.out) {
-  argv.out = path.join(argv.dir, "__generated__")
+  console.log("Please provide output dir (--dir)")
+  process.exit(0)
 }
 
 generateMockClass(

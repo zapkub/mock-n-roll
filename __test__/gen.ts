@@ -6,5 +6,5 @@ const targetFolder = path.join(__dirname, './')
 generateMockClass(
   path.join(__dirname, './abstract.ts'),
   path.join(targetFolder, './__generated__'),
-  "Elastic",
+  "UserRepository",
 )

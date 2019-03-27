@@ -1,5 +1,5 @@
 import { isEqual } from "lodash";
-import { User, CreateInput, CreateManyInput, CreateAdminInput, Admin, RoleInfo } from "../abstract";
+import { Elastic, User, CreateInput, CreateManyInput, CreateAdminInput, Admin, RoleInfo } from "../abstract";
 import { AccessorDeclaration } from "../../node_modules/ts-morph/dist-declarations/ts-morph";
 
 export class __mock__UserRepository {
@@ -17,6 +17,21 @@ export class __mock__UserRepository {
     }
 
     mocks = {
+        init: () => {
+            return {
+                toReturn: () => { this.called.push([["init",]]) }
+            }
+        },
+        bootstrap: () => {
+            return {
+                toReturn: (returnArg: void) => { this.called.push([["bootstrap",], returnArg]) }
+            }
+        },
+        bind: (input: Promise<Elastic>) => {
+            return {
+                toReturn: (returnArg: void) => { this.called.push([["bind", input], returnArg]) }
+            }
+        },
         randomUser: () => {
             return {
                 toReturn: (returnArg: User) => { this.called.push([["randomUser",], returnArg]) }
@@ -52,14 +67,24 @@ export class __mock__UserRepository {
                 toReturn: <T>(returnArg: T) => { this.called.push([["generic", input], returnArg]) }
             }
         },
-        delime: (d: {
-            role: RoleInfo
-        }) => {
+        delime: (d: { role: RoleInfo }) => {
             return {
                 toReturn: (returnArg: AccessorDeclaration) => { this.called.push([["delime", d], returnArg]) }
             }
         }
     };
+
+    init() {
+        return this.on("init")
+    }
+
+    bootstrap(): void {
+        return this.on("bootstrap")
+    }
+
+    bind(input: Promise<Elastic>): void {
+        return this.on("bind", input)
+    }
 
     randomUser(): User {
         return this.on("randomUser")
@@ -88,9 +113,7 @@ export class __mock__UserRepository {
     generic = <T>(input: T) => {
         return this.on("generic", input)
     };
-    delime = (d: {
-        role: RoleInfo
-    }) => {
+    delime = (d: { role: RoleInfo }) => {
         return this.on("delime", d)
     };
 }

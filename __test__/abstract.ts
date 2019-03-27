@@ -1,4 +1,5 @@
 import { AccessorDeclaration } from 'ts-morph'
+import { bind } from 'jest-each';
 export interface User {
   id: string
   name: string
@@ -18,6 +19,9 @@ export type CreateManyInput = Pick<User, 'name'>
 export type CreateAdminInput = Pick<Admin, 'name' | 'role'>
 
 export class Elastic {
+  init() {
+
+  }
   searchUser(): User {
     return {
       id: 'TEST',
@@ -27,6 +31,13 @@ export class Elastic {
 }
 
 export interface UserRepository {
+
+  init()
+
+  bootstrap(): void
+
+  bind(input: Promise<Elastic>): void
+
   randomUser(): User
   createUser(input: CreateInput): Promise<User>
   createManyUser(...inputs: CreateManyInput[]): Promise<User[]>
