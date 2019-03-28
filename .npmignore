@@ -1,5 +1,5 @@
 !dist
 __test__
 !*.js
-
 *.ts
+*.d.ts

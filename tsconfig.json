@@ -9,6 +9,7 @@
     "esModuleInterop": false,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    "declaration": true,
     "sourceMap": true,
     "target": "es2015",
     "lib": [  "es2015", "dom"],

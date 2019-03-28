@@ -16,12 +16,21 @@ export class __mock__Elastic {
     }
 
     mocks = {
+        init: () => {
+            return {
+                toReturn: () => { this.called.push([["init",]]) }
+            }
+        },
         searchUser: () => {
             return {
                 toReturn: (returnArg: User) => { this.called.push([["searchUser",], returnArg]) }
             }
         }
     };
+
+    init() {
+        return this.on("init")
+    }
 
     searchUser(): User {
         return this.on("searchUser")

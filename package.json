@@ -1,6 +1,6 @@
 {
   "name": "@rungsikorn/mock-n-roll",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A Typescript mock file generator",
   "repository": {
     "type": "git",
@@ -9,7 +9,9 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/bin.js --dir ./__test__ --out ./__generated__",
-    "test": "ts-node __test__/gen.ts && jest --config jest.unit.json"
+    "build": "yarn tsc",
+    "test": "ts-node __test__/gen.ts && jest --config jest.unit.json",
+    "prepublish": "yarn tsc"
   },
   "bin": {
     "mnroll": "dist/bin.js"
