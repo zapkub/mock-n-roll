@@ -45,6 +45,8 @@ export interface UserRepository {
 
   gen: (input: string) => User
 
+  callback: (cb: () => void) => string
+
   defaultRole: string
   generic: <T>(input: T) => T
   delimiter(d: AccessorDeclaration): AccessorDeclaration

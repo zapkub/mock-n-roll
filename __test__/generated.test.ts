@@ -24,6 +24,15 @@ describe('Generated mock from class should work', () => {
 describe('Generated result testing', () => {
   const u = new __mock__UserRepository()
 
+  it('should able to mock func arg', () => {
+    u.mocks.callback(() => function() {return "x"}).toReturn("y")
+    expect(u.callback(() => function() {return "x";})).toEqual("y")
+
+
+    u.mocks.callback(function() {return "x"}).toReturn("z")
+    expect(u.callback(function() {return "x";})).toEqual("z")
+  })
+
   it('Should inheritance of source interface', async () => {
     u.defaultRole = 'user'
     function x(userRepository: UserRepository) {
@@ -73,5 +82,9 @@ describe('Generated result testing', () => {
       id: 'TEST_2',
       name: 'TEST_2'
     })
+  })
+
+  it('called should match snapshot', () => {
+    expect(u.called).toMatchSnapshot()
   })
 })

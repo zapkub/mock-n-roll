@@ -2,4 +2,4 @@
 __test__
 !*.js
 *.ts
-*.d.ts
+!*.d.ts

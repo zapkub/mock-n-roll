@@ -9,14 +9,14 @@ generateMockClass(
   "UserRepository",
 )
 
-generateMockClass(
-  path.join(__dirname, './abstract.ts'),
-  path.join(targetFolder, './__generated__'),
-  "Elastic",
-)
+// generateMockClass(
+//   path.join(__dirname, './abstract.ts'),
+//   path.join(targetFolder, './__generated__'),
+//   "Elastic",
+// )
 
-generateMockClass(
-  path.join(__dirname, './fixtures/prisma.ts'),
-  path.join(targetFolder, './__generated__'),
-  "Prisma",
-)
+// generateMockClass(
+//   path.join(__dirname, './fixtures/prisma.ts'),
+//   path.join(targetFolder, './__generated__'),
+//   "Prisma",
+// )

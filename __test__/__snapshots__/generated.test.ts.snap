@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Generated result testing called should match snapshot 1`] = `
+Array [
+  Array [
+    Array [
+      "callback",
+      "{\\"0\\":\\"_$$ND_FUNC$$_() => function () { return \\\\\\"x\\\\\\"; }\\"}",
+    ],
+    "y",
+  ],
+  Array [
+    Array [
+      "callback",
+      "{\\"0\\":\\"_$$ND_FUNC$$_function () { return \\\\\\"x\\\\\\"; }\\"}",
+    ],
+    "z",
+  ],
+  Array [
+    Array [
+      "createManyAdmin",
+      "{\\"0\\":{\\"name\\":\\"TEST\\",\\"role\\":\\"role\\"}}",
+    ],
+    Promise {},
+  ],
+  Array [
+    Array [
+      "gen",
+      "{\\"0\\":\\"Test\\"}",
+    ],
+    Object {
+      "id": "foo",
+      "name": "ba",
+    },
+  ],
+  Array [
+    Array [
+      "randomUser",
+      "{}",
+    ],
+    Object {
+      "id": "TEST",
+      "name": "TEST",
+    },
+  ],
+  Array [
+    Array [
+      "createUser",
+      "{\\"0\\":{\\"name\\":\\"create_TEST_2\\"}}",
+    ],
+    Promise {},
+  ],
+  Array [
+    Array [
+      "createUser",
+      "{\\"0\\":{\\"name\\":\\"create_TEST\\"}}",
+    ],
+    Promise {},
+  ],
+]
+`;

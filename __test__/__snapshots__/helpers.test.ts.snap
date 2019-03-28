@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PushCalled test 1`] = `
+Array [
+  Array [
+    Array [
+      "findSomething",
+      "{\\"0\\":\\"_$$ND_FUNC$$_function (a) { }\\"}",
+    ],
+    "TEST",
+  ],
+]
+`;
+
+exports[`PushCalled test 2`] = `
+Array [
+  Array [
+    Array [
+      "findSomething",
+      "{\\"0\\":\\"_$$ND_FUNC$$_function (a) { }\\"}",
+    ],
+    "TEST",
+  ],
+  Array [
+    Array [
+      "findSomething",
+      "{\\"0\\":\\"_$$ND_FUNC$$_(a) => { }\\",\\"1\\":\\"_$$ND_FUNC$$_() => \\\\\\"x\\\\\\"\\"}",
+    ],
+    "TEST_2",
+  ],
+]
+`;

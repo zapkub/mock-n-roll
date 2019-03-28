@@ -1,17 +1,17 @@
 import { generateMockClass } from './generator'
 
 export type mocknrollOptions = {
-  dir: string
+  path: string
   out?: string
   targetName: string
 }
 export default function(options: mocknrollOptions) {
-  if (!options.dir) {
-    throw new Error('please provide options.dir')
+  if (!options.path) {
+    throw new Error('please provide options.path')
   }
 
   if (!options.out) {
     options.out = '__generated__'
   }
-  generateMockClass(options.dir, options.out, options.targetName)
+  generateMockClass(options.path, options.out, options.targetName)
 }

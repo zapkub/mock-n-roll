@@ -6,6 +6,7 @@ import {
   FunctionTypeNode,
   MethodDeclaration
 } from 'ts-morph'
+import {isEqual} from 'lodash';
 
 export function getIdentifierListOfMethodArgs(
   method: MethodSignature | FunctionTypeNode | MethodDeclaration
@@ -96,7 +97,7 @@ export function ImportByName(
         .find(named => named.getSymbolOrThrow().getName() === name)
     ) {
       importStatement.addNamedImport(name)
-    } 
+    }
     return true
   } else {
     mock.addImportDeclaration({
@@ -105,4 +106,26 @@ export function ImportByName(
     })
     return true
   }
+}
+
+export const Any = () => {
+  return '__MOCK__MATCH_ANY_THING'
+}
+
+var serialize = require('node-serialize')
+export const pushCalled = (calls: any[], methodName: string, ...args: any[]) => {
+  return (returnValue) => {
+    calls.push([[methodName, serialize.serialize(args)], returnValue])
+  }
+}
+
+export const on = (calls: any[], methodName: string, ...args: any[]) => {
+  const result = calls.find(c => {
+    const call = [methodName, serialize.serialize(args)]
+    return isEqual(c[0], call)
+  })
+  if (!result) {
+    throw new Error(`call ${methodName} with ${JSON.stringify(serialize.serialize(...args))} does not exists`)
+  }
+  return result[1]
 }

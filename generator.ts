@@ -2,7 +2,6 @@ import {
   Project,
   SyntaxKind,
   SourceFile,
-  ClassDeclarationStructure,
   ClassDeclaration,
   MethodSignature,
   FunctionTypeNode,
@@ -10,21 +9,26 @@ import {
   InterfaceDeclaration
 } from 'ts-morph'
 import * as path from 'path'
-import { ImportTypeIfNeeded, getIdentifierListOfMethodArgs } from './helpers'
+import {
+  ImportTypeIfNeeded,
+  getIdentifierListOfMethodArgs,
+  pushCalled,
+  on
+} from './helpers'
 import {
   isMethodSignature,
   isFunctionTypeNode,
   isMethodDeclaration
 } from 'typescript'
-import { Interface } from 'readline'
 const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
 
 export function addMocks(mockClass: ClassDeclaration) {
   const mockFile = mockClass.getParentIfKindOrThrow(SyntaxKind.SourceFile)
   mockFile.addImportDeclaration({
-    namedImports: ['isEqual'],
-    moduleSpecifier: 'lodash'
+    moduleSpecifier: 'lodash',
+    // namedImports: ['isEqual']
+    namespaceImport: "lodash_1"
   })
   mockClass.addProperty({
     name: 'called',
@@ -33,32 +37,45 @@ export function addMocks(mockClass: ClassDeclaration) {
       w.write('[]')
     }
   })
-  mockClass.addMethod({
+  mockClass.addProperty({
     name: 'on',
-    parameters: [
-      {
-        name: 'name',
-        type: 'string'
-      },
-      {
-        name: 'args',
-        isRestParameter: true,
-        type: 'any'
-      }
-    ],
-    bodyText: w => {
-      w.writeLine('const result = this.called.find(c => {')
-      w.writeLine('const calls = [name, ...args]')
-      w.writeLine('return isEqual(c[0], calls)')
-      w.writeLine('})')
-      w.writeLine('if (!result) {')
-      w.writeLine(
-        ' throw new Error(`call ${name} with ${JSON.stringify(args)} does not exists`)'
-      )
-      w.writeLine('}')
-      w.writeLine('return result[1]')
+    initializer: w => {
+      w.write(on.toString())
     }
   })
+  mockClass.addProperty({
+    name: 'addCalled',
+    initializer: w => {
+      w.write(pushCalled.toString())
+    }
+  })
+  // mockClass.addMethod({
+  //   name: 'on',
+  //   parameters: [
+  //     {
+  //       name: 'name',
+  //       type: 'string'
+  //     },
+  //     {
+  //       name: 'args',
+  //       isRestParameter: true,
+  //       type: 'any'
+  //     }
+  //   ],
+  //   bodyText: w => {
+  //     w.writeLine('const result = this.called.find(c => {')
+  //     w.writeLine('const calls = [name, ...args]')
+  //     w.writeLine('return isEqual(c[0], calls)')
+  //     w.writeLine('})')
+  //     w.writeLine('if (!result) {')
+  //     w.writeLine(
+  //       ' throw new Error(`call ${name} with ${JSON.stringify(args)} does not exists`)'
+  //     )
+  //     w.writeLine('}')
+  //     w.writeLine('return result[1]')
+  //   }
+  // })
+
   return mockClass
     .addProperty({
       name: 'mocks',
@@ -115,11 +132,11 @@ export function addMocksMethod(
       initializer: w => {
         if (signature.getReturnTypeNode()) {
           w.write(
-            `${typeParam}() => { this.called.push([["${methodName}", ${paramIdentifiers}], returnArg]) }`
+            `${typeParam}() => { this.addCalled(this.called,"${methodName}", ${paramIdentifiers})(returnArg) }`
           )
         } else {
           w.write(
-            `${typeParam}() => { this.called.push([["${methodName}", ${paramIdentifiers}]]) }`
+            `${typeParam}() => { this.addCalled(this.called, "${methodName}",${paramIdentifiers})(undefined) }`
           )
         }
       }
@@ -173,7 +190,7 @@ export function addMethodsToMockClass(
         w.write(methodReturnType)
       },
       bodyText: w => {
-        w.writeLine(`return this.on("${name}", ${methodArgs})`)
+        w.writeLine(`return this.on(this.called, "${name}", ${methodArgs})`)
       }
     })
   } else if (isFunctionTypeNode(m.compilerNode)) {
@@ -194,7 +211,7 @@ export function addMethodsToMockClass(
       initializer: w => {
         w.write(`${typeParam}() =>`)
         w.block(() => {
-          w.writeLine(`return this.on("${name}", ${methodArgs})`)
+          w.writeLine(`return this.on(this.called, "${name}", ${methodArgs})`)
         })
       }
     })
@@ -216,7 +233,10 @@ function generateMock(
 ) {
   const filePath = path.join(mockFolder, `${i.getName()}.ts`)
   rimraf.sync(filePath)
-  const mockFile = project.createSourceFile(filePath)
+  const mockFile = project.createSourceFile(
+    filePath,
+    "const serialize = require('node-serialize')"
+  )
 
   const mockClass = mockFile.addClass({
     name: '__mock__' + i.getName(),
