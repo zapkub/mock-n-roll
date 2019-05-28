@@ -6,7 +6,7 @@ import {
   FunctionTypeNode,
   MethodDeclaration
 } from 'ts-morph'
-import {isEqual} from 'lodash';
+import {isEqual, reverse} from 'lodash';
 
 export function getIdentifierListOfMethodArgs(
   method: MethodSignature | FunctionTypeNode | MethodDeclaration
@@ -108,24 +108,41 @@ export function ImportByName(
   }
 }
 
-export const Any = () => {
-  return '__MOCK__MATCH_ANY_THING'
-}
+export const Any = '__MOCK__MATCH_ANY_THING'
 
 var serialize = require('node-serialize')
 export const pushCalled = (calls: any[], methodName: string, ...args: any[]) => {
   return (returnValue) => {
-    calls.push([[methodName, serialize.serialize(args)], returnValue])
+    calls.push([[methodName, serialize.serialize(args)],args, returnValue])
   }
 }
 
 export const on = (calls: any[], methodName: string, ...args: any[]) => {
-  const result = calls.find(c => {
-    const call = [methodName, serialize.serialize(args)]
-    return isEqual(c[0], call)
+  const call = [methodName, serialize.serialize(args)]
+  const result = reverse(calls).find(c => {
+    if (c[0][0] !== methodName){
+      return false
+    }
+    const equalAssert =  isEqual(c[0], call)
+    if (equalAssert) {
+      return equalAssert
+    }
+
+    const mockAssert = (c[1])
+    const callAssert = args
+    if (Array.isArray(callAssert)){
+      return callAssert.reduce((current, next, i) => {
+          if (mockAssert[i] === Any){
+            return current && true
+          } else {
+            return current && (serialize.serialize(next) === serialize.serialize(mockAssert[i]))
+          }
+      }, true) 
+    }
+    return false
   })
   if (!result) {
-    throw new Error(`call ${methodName} with ${JSON.stringify(serialize.serialize(...args))} does not exists`)
+    throw new Error(`call ${methodName} with ${JSON.stringify(serialize.serialize({ parameters: args }), null, " ")} does not exists`)
   }
-  return result[1]
+  return result[2]
 }

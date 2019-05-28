@@ -7,6 +7,9 @@ Array [
       "findSomething",
       "{\\"0\\":\\"_$$ND_FUNC$$_function (a) { }\\"}",
     ],
+    Array [
+      [Function],
+    ],
     "TEST",
   ],
 ]
@@ -16,8 +19,22 @@ exports[`PushCalled test 2`] = `
 Array [
   Array [
     Array [
+      "findSomethingAny",
+      "{\\"0\\":\\"_$$ND_FUNC$$_function (a) { }\\",\\"1\\":\\"__MOCK__MATCH_ANY_THING\\"}",
+    ],
+    Array [
+      [Function],
+      "__MOCK__MATCH_ANY_THING",
+    ],
+    "TEST",
+  ],
+  Array [
+    Array [
       "findSomething",
       "{\\"0\\":\\"_$$ND_FUNC$$_function (a) { }\\"}",
+    ],
+    Array [
+      [Function],
     ],
     "TEST",
   ],
@@ -25,6 +42,10 @@ Array [
     Array [
       "findSomething",
       "{\\"0\\":\\"_$$ND_FUNC$$_(a) => { }\\",\\"1\\":\\"_$$ND_FUNC$$_() => \\\\\\"x\\\\\\"\\"}",
+    ],
+    Array [
+      [Function],
+      [Function],
     ],
     "TEST_2",
   ],

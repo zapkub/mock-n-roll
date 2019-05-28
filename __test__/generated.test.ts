@@ -17,7 +17,6 @@ describe('Generated mock from class should work', () => {
 
     x(defaultElasic)
     x(mockElastic)
-
   })
 })
 
@@ -25,12 +24,33 @@ describe('Generated result testing', () => {
   const u = new __mock__UserRepository()
 
   it('should able to mock func arg', () => {
-    u.mocks.callback(() => function() {return "x"}).toReturn("y")
-    expect(u.callback(() => function() {return "x";})).toEqual("y")
+    u.mocks
+      .callback(
+        () =>
+          function() {
+            return 'x'
+          }
+      )
+      .toReturn('y')
+    expect(
+      u.callback(
+        () =>
+          function() {
+            return 'x'
+          }
+      )
+    ).toEqual('y')
 
-
-    u.mocks.callback(function() {return "x"}).toReturn("z")
-    expect(u.callback(function() {return "x";})).toEqual("z")
+    u.mocks
+      .callback(function() {
+        return 'x'
+      })
+      .toReturn('z')
+    expect(
+      u.callback(function() {
+        return 'x'
+      })
+    ).toEqual('z')
   })
 
   it('Should inheritance of source interface', async () => {
@@ -42,9 +62,7 @@ describe('Generated result testing', () => {
   })
 
   it('Should return promise of array type correctly', async () => {
-    u.mocks
-      .createManyAdmin({ name: 'TEST', role: 'role' })
-      .toReturn(Promise.resolve([]))
+    u.mocks.createManyAdmin({ name: 'TEST', role: 'role' }).toReturn(([]))
     const result = await u.createManyAdmin({ name: 'TEST', role: 'role' })
     expect(result).toEqual([])
   })
@@ -59,18 +77,14 @@ describe('Generated result testing', () => {
     expect(result).toEqual({ id: 'TEST', name: 'TEST' })
   })
   it('should return multiple mock correctly', async () => {
-    u.mocks.createUser({ name: 'create_TEST_2' }).toReturn(
-      Promise.resolve({
-        id: 'TEST_2',
-        name: 'TEST_2'
-      })
-    )
-    u.mocks.createUser({ name: 'create_TEST' }).toReturn(
-      Promise.resolve({
-        id: 'TEST',
-        name: 'TEST'
-      })
-    )
+    u.mocks.createUser({ name: 'create_TEST_2' }).toReturn({
+      id: 'TEST_2',
+      name: 'TEST_2'
+    })
+    u.mocks.createUser({ name: 'create_TEST' }).toReturn({
+      id: 'TEST',
+      name: 'TEST'
+    })
     let result = await u.createUser({ name: 'create_TEST' })
     expect(result).toEqual({
       id: 'TEST',

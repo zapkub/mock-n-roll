@@ -4,29 +4,55 @@ exports[`Generated result testing called should match snapshot 1`] = `
 Array [
   Array [
     Array [
-      "callback",
-      "{\\"0\\":\\"_$$ND_FUNC$$_() => function () { return \\\\\\"x\\\\\\"; }\\"}",
+      "randomUser",
+      "{}",
     ],
-    "y",
-  ],
-  Array [
-    Array [
-      "callback",
-      "{\\"0\\":\\"_$$ND_FUNC$$_function () { return \\\\\\"x\\\\\\"; }\\"}",
-    ],
-    "z",
+    Array [],
+    Object {
+      "id": "TEST",
+      "name": "TEST",
+    },
   ],
   Array [
     Array [
       "createManyAdmin",
       "{\\"0\\":{\\"name\\":\\"TEST\\",\\"role\\":\\"role\\"}}",
     ],
+    Array [
+      Object {
+        "name": "TEST",
+        "role": "role",
+      },
+    ],
     Promise {},
+  ],
+  Array [
+    Array [
+      "callback",
+      "{\\"0\\":\\"_$$ND_FUNC$$_() => function () {\\\\n            return 'x';\\\\n        }\\"}",
+    ],
+    Array [
+      [Function],
+    ],
+    "y",
+  ],
+  Array [
+    Array [
+      "callback",
+      "{\\"0\\":\\"_$$ND_FUNC$$_function () {\\\\n            return 'x';\\\\n        }\\"}",
+    ],
+    Array [
+      [Function],
+    ],
+    "z",
   ],
   Array [
     Array [
       "gen",
       "{\\"0\\":\\"Test\\"}",
+    ],
+    Array [
+      "Test",
     ],
     Object {
       "id": "foo",
@@ -35,18 +61,13 @@ Array [
   ],
   Array [
     Array [
-      "randomUser",
-      "{}",
-    ],
-    Object {
-      "id": "TEST",
-      "name": "TEST",
-    },
-  ],
-  Array [
-    Array [
       "createUser",
       "{\\"0\\":{\\"name\\":\\"create_TEST_2\\"}}",
+    ],
+    Array [
+      Object {
+        "name": "create_TEST_2",
+      },
     ],
     Promise {},
   ],
@@ -54,6 +75,11 @@ Array [
     Array [
       "createUser",
       "{\\"0\\":{\\"name\\":\\"create_TEST\\"}}",
+    ],
+    Array [
+      Object {
+        "name": "create_TEST",
+      },
     ],
     Promise {},
   ],

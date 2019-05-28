@@ -7,18 +7,37 @@ const serialize = require('node-serialize')
 export class __mock__UserRepository {
     called: any[] = [];
     on = (calls, methodName, ...args) => {
-        const result = calls.find(c => {
-            const call = [methodName, serialize.serialize(args)];
-            return lodash_1.isEqual(c[0], call);
+        const call = [methodName, serialize.serialize(args)];
+        const result = lodash_1.reverse(calls).find(c => {
+            if (c[0][0] !== methodName) {
+                return false;
+            }
+            const equalAssert = lodash_1.isEqual(c[0], call);
+            if (equalAssert) {
+                return equalAssert;
+            }
+            const mockAssert = (c[1]);
+            const callAssert = args;
+            if (Array.isArray(callAssert)) {
+                return callAssert.reduce((current, next, i) => {
+                    if (mockAssert[i] === exports.Any) {
+                        return current && true;
+                    }
+                    else {
+                        return current && (serialize.serialize(next) === serialize.serialize(mockAssert[i]));
+                    }
+                }, true);
+            }
+            return false;
         });
         if (!result) {
-            throw new Error(`call ${methodName} with ${JSON.stringify(serialize.serialize(...args))} does not exists`);
+            throw new Error(`call ${methodName} with ${JSON.stringify(serialize.serialize({ parameters: args }), null, " ")} does not exists`);
         }
-        return result[1];
+        return result[2];
     };
     addCalled = (calls, methodName, ...args) => {
         return (returnValue) => {
-            calls.push([[methodName, serialize.serialize(args)], returnValue]);
+            calls.push([[methodName, serialize.serialize(args)], args, returnValue]);
         };
     };
     mocks = {
@@ -44,17 +63,17 @@ export class __mock__UserRepository {
         },
         createUser: (input: CreateInput) => {
             return {
-                toReturn: (returnArg: Promise<User>) => { this.addCalled(this.called, "createUser", input)(returnArg) }
+                toReturn: (returnArg: User) => { this.addCalled(this.called, "createUser", input)(Promise.resolve(returnArg)) }
             }
         },
         createManyUser: (...inputs: CreateManyInput[]) => {
             return {
-                toReturn: (returnArg: Promise<User[]>) => { this.addCalled(this.called, "createManyUser", ...inputs)(returnArg) }
+                toReturn: (returnArg: User[]) => { this.addCalled(this.called, "createManyUser", ...inputs)(Promise.resolve(returnArg)) }
             }
         },
         createManyAdmin: (...inputs: CreateAdminInput[]) => {
             return {
-                toReturn: (returnArg: Promise<Admin[]>) => { this.addCalled(this.called, "createManyAdmin", ...inputs)(returnArg) }
+                toReturn: (returnArg: Admin[]) => { this.addCalled(this.called, "createManyAdmin", ...inputs)(Promise.resolve(returnArg)) }
             }
         },
         delimiter: (d: AccessorDeclaration) => {
